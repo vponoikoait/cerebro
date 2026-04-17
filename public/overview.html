@@ -227,6 +227,14 @@
               <div>
                 <small>{{node.host}}</small>
               </div>
+              <div style="padding-top: 2px;">
+                <small>
+                  <span ng-show="node.master" style="color: #E4D836;" title="master eligible"><i class="fa fa-star"></i> master </span>
+                  <span ng-show="node.data" style="color: #1CA8DD;" title="data node"><i class="fa fa-hdd-o"></i> data </span>
+                  <span ng-show="node.ingest" style="color: #1AC98E;" title="ingest node"><i class="fa fa-crop"></i> ingest </span>
+                  <span ng-show="node.coordinating" style="color: #9F85FF;" title="coordinating only"><i class="fa fa-crosshairs"></i> coord </span>
+                </small>
+              </div>
             </div>
           </div>
         </div>
@@ -240,6 +248,10 @@
         <div ng-show="expandedView" class="node-labels">
           <span class="label label-primary">JVM: {{node.jvm_version}}</span>
           <span class="label label-primary">ES: {{node.es_version}}</span>
+          <span class="label label-default" ng-show="node.master" title="master eligible"><i class="fa fa-star"></i> master</span>
+          <span class="label label-default" ng-show="node.data" title="data node"><i class="fa fa-hdd-o"></i> data</span>
+          <span class="label label-default" ng-show="node.ingest" title="ingest node"><i class="fa fa-crop"></i> ingest</span>
+          <span class="label label-default" ng-show="node.coordinating" title="coordinating only"><i class="fa fa-crosshairs"></i> coordinating</span>
         </div>
         <div class="row row-condensed">
           <div class="col-lg-3 col-condensed">

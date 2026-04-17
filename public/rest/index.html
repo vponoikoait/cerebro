@@ -37,6 +37,8 @@
           <option value="PUT">PUT</option>
           <option value="POST" selected="selected">POST</option>
           <option value="DELETE">DELETE</option>
+          <option value="HEAD">HEAD</option>
+          <option value="PATCH">PATCH</option>
         </select>
       </div>
     </div>
@@ -47,12 +49,17 @@
         </a>
       </div>
       <div class="col-xs-12 panel-collapse collapse" id="restHistory" ng-show="history.length">
+        <div style="padding: 5px 0;">
+          <input type="text" class="form-control form-control-sm"
+                 ng-model="historyFilter"
+                 placeholder="filter history by path or method...">
+        </div>
         <a data-toggle="collapse" data-parent="#restAccordion" target="_self" href="#restHistory">
         <span>
           <table class="table table-condensed">
-            <tr ng-repeat="h in history" class="normal-action" ng-click="loadRequest(h)">
+            <tr ng-repeat="h in filteredHistory()" class="normal-action" ng-click="loadRequest(h)">
               <td style="width: 100px">{{h.created_at}}</td>
-              <td style="width: 60px">{{h.method}}</td>
+              <td style="width: 60px"><span class="label label-default">{{h.method}}</span></td>
               <td>{{h.path}}</td>
             </tr>
           </table>
@@ -86,6 +93,18 @@
     </div>
   </div>
   <div class="col-md-6">
+    <div ng-show="responseTime" style="margin-bottom: 5px;">
+      <span class="label"
+            ng-class="{'label-success': responseStatus === 200, 'label-danger': responseStatus !== 200}">
+        {{responseStatus}}
+      </span>
+      <span class="text-muted" style="margin-left: 5px;">
+        <i class="fa fa-clock-o"></i> {{responseTime}} ms
+      </span>
+      <button class="btn btn-xs btn-default pull-right" ng-click="copyResponse()" title="Copy response">
+        <i class="fa fa-clipboard"></i> copy
+      </button>
+    </div>
     <div style="border: 1px solid #55595c; min-height: 647px; overflow: auto; display: block;">
       <div class="modal-body" ng-bind-html="response">
       </div>

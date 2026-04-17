@@ -5,6 +5,8 @@ angular.module('cerebro').controller('RestController', ['$scope', '$http',
       AceEditorService, ClipboardService) {
     $scope.editor = undefined;
     $scope.response = undefined;
+    $scope.responseTime = undefined;
+    $scope.responseStatus = undefined;
 
     $scope.indices = undefined;
     $scope.host = undefined;
@@ -13,24 +15,43 @@ angular.module('cerebro').controller('RestController', ['$scope', '$http',
     $scope.path = '';
     $scope.options = [];
 
-    var success = function(response) {
+    // History search
+    $scope.historyFilter = '';
+
+    var success = function(response, elapsed, status) {
       $scope.response = $sce.trustAsHtml(JSONTree.create(response));
+      $scope.responseTime = elapsed;
+      $scope.responseStatus = status;
       $scope.loadHistory();
     };
 
-    var failure = function(response) {
+    var failure = function(response, elapsed, status) {
       $scope.response = $sce.trustAsHtml(JSONTree.create(response));
+      $scope.responseTime = elapsed;
+      $scope.responseStatus = status;
     };
 
     $scope.execute = function() {
       var data = $scope.editor.getStringValue();
       var method = $scope.method;
       $scope.response = undefined;
+      $scope.responseTime = undefined;
+      $scope.responseStatus = undefined;
       try {
         data = $scope.editor.getValue();
       } catch (error) {
       }
-      RestDataService.execute(method, $scope.path, data, success, failure);
+      var startTime = new Date().getTime();
+      RestDataService.execute(method, $scope.path, data,
+          function(response) {
+            var elapsed = new Date().getTime() - startTime;
+            success(response, elapsed, 200);
+          },
+          function(response) {
+            var elapsed = new Date().getTime() - startTime;
+            failure(response, elapsed, response.status || 'error');
+          }
+      );
     };
 
     $scope.setup = function() {
@@ -65,6 +86,16 @@ angular.module('cerebro').controller('RestController', ['$scope', '$http',
             AlertService.error('Error while loading request history', error);
           }
       );
+    };
+
+    $scope.filteredHistory = function() {
+      if (!$scope.history) return [];
+      if (!$scope.historyFilter) return $scope.history;
+      var filter = $scope.historyFilter.toLowerCase();
+      return $scope.history.filter(function(h) {
+        return h.path.toLowerCase().indexOf(filter) >= 0 ||
+               h.method.toLowerCase().indexOf(filter) >= 0;
+      });
     };
 
     $scope.updateOptions = function(text) {
@@ -115,6 +146,22 @@ angular.module('cerebro').controller('RestController', ['$scope', '$http',
           },
           function() {
             AlertService.error('Error while copying request to clipboard');
+          }
+      );
+    };
+
+    $scope.copyResponse = function() {
+      var el = document.querySelector('.modal-body');
+      if (!el) return;
+      // Extract text from the JSON tree
+      var text = el.innerText || el.textContent;
+      ClipboardService.copy(
+          text,
+          function() {
+            AlertService.info('Response copied to clipboard');
+          },
+          function() {
+            AlertService.error('Error copying response');
           }
       );
     };

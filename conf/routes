@@ -92,3 +92,12 @@ GET         /login                                    controllers.AuthController
 # Map the JS resource paths
 GET         /public/*file                             controllers.Assets.at(path="/public", file)
 GET         /*file                                    controllers.Assets.versioned(path="/public", file: Asset)
+
+# Mapping diff module
+POST        /mapping_diff                             controllers.CommonsController.getMappingDiff
+
+# Rolling restart module
+POST        /rolling_restart/status                   controllers.ClusterOverviewController.rollingRestartStatus
+POST        /rolling_restart/disable_allocation       controllers.ClusterOverviewController.disableShardAllocation
+POST        /rolling_restart/enable_allocation        controllers.ClusterOverviewController.enableShardAllocation
+POST        /rolling_restart/flush_synced             controllers.ClusterOverviewController.flushIndex

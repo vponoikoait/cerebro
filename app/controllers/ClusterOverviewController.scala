@@ -10,7 +10,6 @@ import services.overview.OverviewDataService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
 class ClusterOverviewController @Inject()(val authentication: AuthenticationModule,
                                           val hosts: Hosts,
                                           val service: OverviewDataService,
@@ -105,6 +104,32 @@ class ClusterOverviewController @Inject()(val authentication: AuthenticationModu
     val server = request.target
     client.relocateShard(shard, index, from, to, server).map { response =>
       CerebroResponse(response.status, response.body)
+    }
+  }
+
+  def rollingRestartStatus = process { request =>
+    Future.sequence(Seq(
+      client.clusterHealth(request.target),
+      client.clusterSettings(request.target)
+    )).map { responses =>
+      val failed = responses.find(_.isInstanceOf[Error])
+      failed match {
+        case Some(f) => CerebroResponse(f.status, f.body)
+        case None =>
+          val health = responses(0).body
+          val settings = responses(1).body
+          val transientAllocation = (settings \ "transient" \ "cluster" \ "routing" \ "allocation" \ "enable").asOpt[String]
+          val persistentAllocation = (settings \ "persistent" \ "cluster" \ "routing" \ "allocation" \ "enable").asOpt[String].getOrElse("all")
+          val allocationEnabled = transientAllocation.getOrElse(persistentAllocation).equals("all")
+          CerebroResponse(200, play.api.libs.json.Json.obj(
+            "status" -> (health \ "status").as[play.api.libs.json.JsString],
+            "relocating_shards" -> (health \ "relocating_shards").as[play.api.libs.json.JsNumber],
+            "initializing_shards" -> (health \ "initializing_shards").as[play.api.libs.json.JsNumber],
+            "unassigned_shards" -> (health \ "unassigned_shards").as[play.api.libs.json.JsNumber],
+            "number_of_nodes" -> (health \ "number_of_nodes").as[play.api.libs.json.JsNumber],
+            "allocation_enabled" -> play.api.libs.json.JsBoolean(allocationEnabled)
+          ))
+      }
     }
   }
 

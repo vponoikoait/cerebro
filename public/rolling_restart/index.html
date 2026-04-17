@@ -1,0 +1,197 @@
+<div ng-init="setup()">
+  <div class="row">
+    <div class="col-lg-12">
+      <h4><i class="fa fa-refresh"></i> Rolling Restart Helper</h4>
+      <p class="info-text">Step-by-step guided workflow for safely restarting cluster nodes one at a time.</p>
+    </div>
+  </div>
+
+  <!-- Guide -->
+  <div class="row" style="margin-bottom: 15px;">
+    <div class="col-lg-12">
+      <a data-toggle="collapse" target="_self" href="#restartGuide" class="info-text">
+        <i class="fa fa-question-circle"></i> What is this and when do I need it?
+      </a>
+      <div class="collapse" id="restartGuide" style="margin-top: 10px; border: 1px solid #55595c; padding: 15px;">
+        <p>A <strong>rolling restart</strong> lets you restart every node in an Elasticsearch cluster one at a time, without downtime or data loss. You need it when:</p>
+        <ul>
+          <li>Applying OS or JVM patches that require a process restart</li>
+          <li>Upgrading Elasticsearch to a new minor/patch version</li>
+          <li>Changing JVM settings (heap size, GC options) that require a restart</li>
+          <li>Replacing hardware or migrating nodes to new machines</li>
+        </ul>
+        <p><strong>Why not just restart all nodes at once?</strong> Because Elasticsearch would try to rebalance shards for every node that goes down, causing massive unnecessary data movement, high disk I/O, and potential data unavailability.</p>
+        <p>This wizard automates the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.17/restart-cluster.html#restart-cluster-rolling" target="_blank" style="color: #1CA8DD;">official rolling restart procedure</a>:</p>
+        <ol>
+          <li><strong>Check health</strong> — make sure the cluster is green (or at least yellow) before starting</li>
+          <li><strong>Disable allocation</strong> — tell ES not to move shards while a node is down</li>
+          <li><strong>Flush</strong> — write in-memory data to disk so recovery is faster</li>
+          <li><strong>Restart the node</strong> — you do this outside Cerebro (systemctl, docker, etc.)</li>
+          <li><strong>Re-enable allocation</strong> — let ES assign shards back to the restarted node</li>
+          <li><strong>Wait for green</strong> — confirm all shards are recovered before moving to the next node</li>
+        </ol>
+        <p class="info-text" style="margin-bottom: 0;">Repeat steps 2–6 for each node in the cluster.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cluster status bar -->
+  <div class="row" ng-show="status" style="margin-bottom: 10px;">
+    <div class="col-lg-12">
+      <div class="stat" style="text-align: left; padding: 8px 15px; line-height: 22px;">
+        <span class="label" style="font-size: 13px;"
+              ng-class="{'label-success': status.status === 'green', 'label-warning': status.status === 'yellow', 'label-danger': status.status === 'red'}">
+          {{status.status}}
+        </span>
+        &nbsp; {{status.number_of_nodes}} nodes
+        &nbsp; | &nbsp; Allocation:
+        <strong ng-style="{color: status.allocation_enabled ? '#1AC98E' : '#E64759'}">
+          {{status.allocation_enabled ? 'enabled' : 'disabled'}}
+        </strong>
+        <span ng-show="status.relocating_shards > 0">
+          &nbsp; | &nbsp; <i class="fa fa-exchange"></i> {{status.relocating_shards}} relocating
+        </span>
+        <span ng-show="status.initializing_shards > 0">
+          &nbsp; | &nbsp; <i class="fa fa-spinner fa-spin"></i> {{status.initializing_shards}} initializing
+        </span>
+        <span ng-show="status.unassigned_shards > 0">
+          &nbsp; | &nbsp; <i class="fa fa-exclamation-triangle"></i> {{status.unassigned_shards}} unassigned
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step progress -->
+  <div class="row" style="margin-bottom: 15px;">
+    <div class="col-lg-12">
+      <div class="progress" style="height: 20px; background-color: #434749;">
+        <div class="progress-bar"
+             ng-class="{'progress-bar-success': step === 6 && status.status === 'green', 'progress-bar-info': step < 6 || status.status !== 'green'}"
+             role="progressbar"
+             style="width: {{(step / 6) * 100}}%; line-height: 20px;">
+          Step {{step}} of 6
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Steps -->
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2">
+
+      <!-- Step 1: Check health -->
+      <div ng-show="step === 1" style="border: 1px solid #55595c; padding: 15px; margin-bottom: 15px;">
+        <h5><i class="fa fa-heartbeat"></i> Step 1: Check Cluster Health</h5>
+        <hr class="header">
+        <p class="info-text">Before starting, verify the cluster is healthy.</p>
+        <div ng-show="status">
+          <p ng-show="status.status === 'green'" style="color: #1AC98E;">
+            <i class="fa fa-check-circle"></i> Cluster is green. Safe to proceed.
+          </p>
+          <p ng-show="status.status === 'yellow'" style="color: #E4D836;">
+            <i class="fa fa-warning"></i> Cluster is yellow. Proceed with caution — some replicas are unassigned.
+          </p>
+          <p ng-show="status.status === 'red'" style="color: #E64759;">
+            <i class="fa fa-times-circle"></i> Cluster is red. Do NOT proceed until the cluster is at least yellow.
+          </p>
+        </div>
+        <button class="btn btn-default btn-sm" ng-click="refreshStatus()">
+          <i class="fa fa-refresh"></i> Refresh
+        </button>
+        <button class="btn btn-primary btn-sm pull-right" ng-click="step = 2"
+                ng-disabled="status.status === 'red'">
+          Next <i class="fa fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- Step 2: Disable allocation -->
+      <div ng-show="step === 2" style="border: 1px solid #55595c; padding: 15px; margin-bottom: 15px;">
+        <h5><i class="fa fa-ban"></i> Step 2: Disable Shard Allocation</h5>
+        <hr class="header">
+        <p class="info-text">This prevents shards from being moved while a node is down.</p>
+        <div ng-show="!status.allocation_enabled" style="color: #1AC98E; margin-bottom: 10px;">
+          <i class="fa fa-check-circle"></i> Allocation is already disabled. You can skip this step.
+        </div>
+        <button class="btn btn-warning btn-sm" ng-click="disableAllocation()"
+                ng-show="status.allocation_enabled">
+          <i class="fa fa-ban"></i> Disable Allocation
+        </button>
+        <button class="btn btn-primary btn-sm pull-right" ng-click="step = 3"
+                ng-show="!status.allocation_enabled">
+          Next <i class="fa fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- Step 3: Flush -->
+      <div ng-show="step === 3" style="border: 1px solid #55595c; padding: 15px; margin-bottom: 15px;">
+        <h5><i class="fa fa-download"></i> Step 3: Flush Indices</h5>
+        <hr class="header">
+        <p class="info-text">Flush all indices to reduce recovery time after the node restarts.</p>
+        <button class="btn btn-info btn-sm" ng-click="flushIndices()">
+          <i class="fa fa-download"></i> Flush All
+        </button>
+        <button class="btn btn-primary btn-sm pull-right" ng-click="step = 4">
+          Next <i class="fa fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- Step 4: Restart node -->
+      <div ng-show="step === 4" style="border: 1px solid #55595c; padding: 15px; margin-bottom: 15px;">
+        <h5><i class="fa fa-refresh"></i> Step 4: Restart the Node</h5>
+        <hr class="header">
+        <p>Now restart the Elasticsearch node using your preferred method (systemctl, docker restart, etc.).</p>
+        <p class="info-text">Click the button below once the node has rejoined the cluster.</p>
+        <button class="btn btn-default btn-sm" ng-click="refreshStatus()">
+          <i class="fa fa-refresh"></i> Refresh Status
+        </button>
+        <button class="btn btn-success btn-sm pull-right" ng-click="nodeRestarted()">
+          <i class="fa fa-check"></i> Node is back
+        </button>
+      </div>
+
+      <!-- Step 5: Re-enable allocation -->
+      <div ng-show="step === 5" style="border: 1px solid #55595c; padding: 15px; margin-bottom: 15px;">
+        <h5><i class="fa fa-check"></i> Step 5: Re-enable Shard Allocation</h5>
+        <hr class="header">
+        <p class="info-text">Re-enable allocation so shards can be assigned to the restarted node.</p>
+        <div ng-show="status.allocation_enabled" style="color: #1AC98E; margin-bottom: 10px;">
+          <i class="fa fa-check-circle"></i> Allocation is already enabled.
+        </div>
+        <button class="btn btn-success btn-sm" ng-click="enableAllocation()"
+                ng-show="!status.allocation_enabled">
+          <i class="fa fa-check"></i> Enable Allocation
+        </button>
+        <button class="btn btn-primary btn-sm pull-right" ng-click="step = 6; startPolling()"
+                ng-show="status.allocation_enabled">
+          Next <i class="fa fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- Step 6: Wait for green -->
+      <div ng-show="step === 6" style="border: 1px solid #55595c; padding: 15px; margin-bottom: 15px;">
+        <h5><i class="fa fa-hourglass-half"></i> Step 6: Wait for Green</h5>
+        <hr class="header">
+        <div ng-show="status.status === 'green' && status.relocating_shards === 0 && status.initializing_shards === 0">
+          <p style="color: #1AC98E; font-size: 16px;">
+            <i class="fa fa-check-circle"></i> <strong>Cluster is green!</strong> Ready for the next node.
+          </p>
+          <button class="btn btn-primary btn-sm" ng-click="nextNode()">
+            <i class="fa fa-forward"></i> Restart Another Node
+          </button>
+          <button class="btn btn-success btn-sm" ng-click="reset()">
+            <i class="fa fa-check"></i> Done
+          </button>
+        </div>
+        <div ng-show="status.status !== 'green' || status.relocating_shards > 0 || status.initializing_shards > 0">
+          <p class="info-text">
+            <i class="fa fa-spinner fa-spin"></i> Waiting for cluster to recover. Auto-refreshing every 5 seconds...
+          </p>
+          <button class="btn btn-default btn-sm" ng-click="refreshStatus()">
+            <i class="fa fa-refresh"></i> Refresh Now
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

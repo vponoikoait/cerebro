@@ -1,0 +1,87 @@
+<div ng-init="setup()">
+  <div class="row">
+    <div class="col-lg-12">
+      <h4><i class="fa fa-exchange"></i> Mapping Diff</h4>
+      <p class="info-text">Compare field mappings between two indices side by side.</p>
+    </div>
+  </div>
+
+  <div class="row query-container">
+    <div class="col-md-4">
+      <label class="form-label">Index A</label>
+      <select ng-model="indexA" class="form-control"
+              ng-options="idx for idx in indices | orderBy">
+        <option value="">-- select index --</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Index B</label>
+      <select ng-model="indexB" class="form-control"
+              ng-options="idx for idx in indices | orderBy">
+        <option value="">-- select index --</option>
+      </select>
+    </div>
+    <div class="col-md-4" style="padding-top: 22px;">
+      <button class="btn btn-primary" ng-click="compare()"
+              ng-disabled="!indexA || !indexB">
+        <i class="fa fa-exchange"></i> Compare
+      </button>
+    </div>
+  </div>
+
+  <div ng-show="result">
+    <div class="row" style="margin-bottom: 10px;">
+      <div class="col-lg-12">
+        <div class="stat" style="text-align: left; padding: 8px 15px; line-height: 22px;">
+          <span class="stat-value">{{result.stats.total}}</span> <span class="info-text">fields</span>
+          &nbsp; | &nbsp;
+          <span class="text-success"><i class="fa fa-check"></i> {{result.stats.same}} same</span>
+          &nbsp;
+          <span style="color: #E4D836;"><i class="fa fa-pencil"></i> {{result.stats.changed}} changed</span>
+          &nbsp;
+          <span style="color: #1CA8DD;"><i class="fa fa-plus"></i> {{result.stats.added}} only in {{result.nameB}}</span>
+          &nbsp;
+          <span class="text-danger"><i class="fa fa-minus"></i> {{result.stats.removed}} only in {{result.nameA}}</span>
+          &nbsp; &nbsp;
+          <label style="font-weight: normal; cursor: pointer;">
+            <input type="checkbox" ng-model="showDiffsOnly"> differences only
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>{{result.nameA}}</th>
+              <th>{{result.nameB}}</th>
+              <th style="width: 100px;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="row in filteredRows()">
+              <td><code style="color: #D0D0D0; background: none;">{{row.field}}</code></td>
+              <td>
+                <span ng-show="row.typeA !== '-'">{{row.typeA}}</span>
+                <span ng-show="row.typeA === '-'" class="info-text">—</span>
+              </td>
+              <td>
+                <span ng-show="row.typeB !== '-'">{{row.typeB}}</span>
+                <span ng-show="row.typeB === '-'" class="info-text">—</span>
+              </td>
+              <td>
+                <span ng-show="row.status === 'same'" class="text-success"><i class="fa fa-check"></i></span>
+                <span ng-show="row.status === 'changed'" style="color: #E4D836;"><i class="fa fa-pencil"></i> changed</span>
+                <span ng-show="row.status === 'added'" style="color: #1CA8DD;"><i class="fa fa-plus"></i> added</span>
+                <span ng-show="row.status === 'removed'" class="text-danger"><i class="fa fa-minus"></i> removed</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

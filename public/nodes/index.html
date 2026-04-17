@@ -92,6 +92,14 @@
         <span class="label label-primary" ng-show="node.jvm">JVM: {{node.jvm}}</span>
         <span class="label label-primary">ES: {{node.version}}</span>
       </div>
+      <div>
+        <small class="info-text">
+          <span ng-show="node.master"><i class="fa fa-star"></i> master </span>
+          <span ng-show="node.data"><i class="fa fa-hdd-o"></i> data </span>
+          <span ng-show="node.ingest"><i class="fa fa-crop"></i> ingest </span>
+          <span ng-show="node.coordinating"><i class="fa fa-crosshairs"></i> coordinating </span>
+        </small>
+      </div>
     </td>
     <td>
       <div>
