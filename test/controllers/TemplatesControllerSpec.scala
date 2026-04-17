@@ -12,13 +12,12 @@ object TemplatesControllerSpec extends MockedServices {
 
   def is =
     s2"""
-    TemplatesController should                           ${step(play.api.Play.start(application))}
+    TemplatesController should
       return all templates                               $templates
       delete template                                    $delete
       require template name to delete                    $requireNameDelete
       create template                                    $create
       require template name to create                    $requireNameCreate
-                                                         ${step(play.api.Play.stop(application))}
       """
 
   def templates = {

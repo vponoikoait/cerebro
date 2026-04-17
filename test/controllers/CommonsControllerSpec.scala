@@ -12,7 +12,7 @@ class CommonsControllerSpec extends MockedServices {
 
   def is =
     s2"""
-    CommonsController should                            ${step(play.api.Play.start(application))}
+    CommonsController should
       return indices                                    $indices
 
       return index mapping                              $getIndexMapping
@@ -23,8 +23,6 @@ class CommonsControllerSpec extends MockedServices {
 
       return node stats                                 $getNodeStats
       validate node parameter                           $missingNode
-
-                                                        ${step(play.api.Play.stop(application))}
       """
 
   def indices = {

@@ -12,9 +12,8 @@ object ClusterChangesControllerSpec extends MockedServices {
 
   def is =
     s2"""
-    ClusterChangesController should               ${step(play.api.Play.start(application))}
+    ClusterChangesController should
       return indices, nodes and cluster name      $get
-                                                  ${step(play.api.Play.stop(application))}
       """
 
   def get = {

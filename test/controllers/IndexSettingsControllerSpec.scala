@@ -12,10 +12,9 @@ object IndexSettingsControllerSpec extends MockedServices {
 
   def is =
     s2"""
-    IndexSettingsController should            ${step(play.api.Play.start(application))}
+    IndexSettingsController should
       return index settings                   $get
       update index settings                   $update
-                                              ${step(play.api.Play.stop(application))}
       """
 
   def get = {

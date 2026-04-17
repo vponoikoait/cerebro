@@ -7,6 +7,7 @@ services:
       - "9000:9000"
     environment:
       - CEREBRO_PORT=9000
+      - CEREBRO_KNOWN_HOSTS=http://elasticsearch:9200
     depends_on:
       elasticsearch:
         condition: service_healthy

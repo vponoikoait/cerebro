@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import controllers.auth.{AuthAction, AuthenticationModule}
 import forms.LoginForm
 import play.api.Configuration

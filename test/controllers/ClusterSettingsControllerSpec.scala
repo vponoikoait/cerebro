@@ -12,11 +12,10 @@ object ClusterSettingsControllerSpec extends MockedServices {
 
   def is =
     s2"""
-    ClusterSettingsController should                     ${step(play.api.Play.start(application))}
+    ClusterSettingsController should
       return cluster settings                            $getSettings
       update cluster settings                            $updateSettings
       require settings to update                         $requireSettings
-                                                         ${step(play.api.Play.stop(application))}
       """
 
   def getSettings = {

@@ -12,7 +12,7 @@ object OverviewControllerSpec extends MockedServices {
 
   def is =
     s2"""
-    OverviewController should                            ${step(play.api.Play.start(application))}
+    OverviewController should
       should correctly delete index                      $deleteIndex
       should validate existence of index parameter       $missingIndicesToDelete
 
@@ -41,7 +41,6 @@ object OverviewControllerSpec extends MockedServices {
 
       should correctly clear index cache                 $enableShardAllocation
       should correctly clear index cache                 $disableShardAllocation
-                                                         ${step(play.api.Play.stop(application))}
       """
 
   def deleteIndex = {

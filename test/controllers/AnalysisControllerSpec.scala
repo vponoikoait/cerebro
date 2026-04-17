@@ -12,13 +12,12 @@ object AnalysisControllerSpec extends MockedServices {
 
   def is =
     s2"""
-    AnalysisController should                            ${step(play.api.Play.start(application))}
+    AnalysisController should
       return open indices                                $indices
       return index analyzers                             $analyzers
       return index fields                                $fields
       analyze by field                                   $analyzeByField
       analyze by analyzer                                $analyzeByAnalyzer
-                                                         ${step(play.api.Play.stop(application))}
       """
 
   def indices = {

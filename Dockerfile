@@ -44,7 +44,10 @@ COPY app/ app/
 COPY conf/ conf/
 COPY test/ test/
 
-# Copy frontend build output from stage 1
+# Copy existing public assets (HTML templates, images, etc.)
+COPY public/ public/
+
+# Overlay frontend build output from stage 1 (compiled JS/CSS/fonts)
 COPY --from=frontend-builder /build/public/ public/
 
 # Compile and create distribution package

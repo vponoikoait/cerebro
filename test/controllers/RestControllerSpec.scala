@@ -12,11 +12,10 @@ object RestControllerSpec extends MockedServices {
 
   def is =
     s2"""
-    RestController should                               ${step(play.api.Play.start(application))}
+    RestController should
       invoke refreshIndex                               $executeRequest
       should throw exception if method param is missing $missingMethod
       should throw exception if path param is missing   $missingPath
-                                                         ${step(play.api.Play.stop(application))}
       """
 
   def executeRequest = {

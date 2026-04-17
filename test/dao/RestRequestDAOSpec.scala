@@ -4,7 +4,6 @@ import java.sql.Date
 
 import org.specs2.Specification
 import org.specs2.concurrent.ExecutionEnv
-import play.api.Play._
 import play.api.inject.guice.GuiceApplicationBuilder
 
 import scala.concurrent.Future
@@ -20,12 +19,11 @@ class RestRequestDAOSpec(implicit ee: ExecutionEnv) extends Specification {
 
   override def is =
     sequential ^ s2"""
-    RestRequestDAO should                   ${step(start(app))}
+    RestRequestDAO should
         create a new entry                  $save
         update an existing entry            $update
         ensures history has max size        $maxSize
         clear all entries for given user    $clear
-                                            ${step(stop(app))}
       """
 
   def save = {
