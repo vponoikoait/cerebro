@@ -1,0 +1,36 @@
+# Version control
+.git
+.github
+.gitignore
+
+# IDE
+.idea
+*.iml
+
+# Build artifacts
+target/
+project/target/
+project/project/
+
+# Node modules (rebuilt in Docker)
+node_modules/
+
+# Database files
+*.db
+
+# Logs
+logs/
+log/
+
+# Documentation
+*.md
+!README.md
+LICENSE
+CONTRIBUTING.md
+
+# CI
+.travis.yml
+
+# OS files
+.DS_Store
+Thumbs.db

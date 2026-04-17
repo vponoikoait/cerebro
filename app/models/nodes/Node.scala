@@ -34,12 +34,8 @@ object Node extends NodeInfo {
   }
 
   private def cpu(stats: JsValue): JsValue = {
-    val load = (stats \ "os" \ "cpu" \ "load_average" \ "1m").asOpt[JsValue].getOrElse(// 5.X
-      (stats \ "os" \ "load_average").asOpt[JsValue].getOrElse(JsNull) // FIXME: 2.X
-    )
-    val osCpu = (stats \ "os" \ "cpu" \ "percent").asOpt[JsValue].getOrElse(// 5.X
-      (stats \ "os" \ "cpu_percent").asOpt[JsValue].getOrElse(JsNull) // FIXME 2.X
-    )
+    val load = (stats \ "os" \ "cpu" \ "load_average" \ "1m").asOpt[JsValue].getOrElse(JsNull)
+    val osCpu = (stats \ "os" \ "cpu" \ "percent").asOpt[JsValue].getOrElse(JsNull)
     Json.obj(
       "process" -> (stats \ "process" \ "cpu" \ "percent").as[JsValue],
       "os" -> osCpu,
@@ -51,7 +47,7 @@ object Node extends NodeInfo {
     val total = (stats \ "fs" \ "total" \ "total_in_bytes").asOpt[Long]
     val available = (stats \ "fs" \ "total" \ "available_in_bytes").asOpt[Long]
     (total, available) match {
-      case (Some(t), Some(a)) =>
+      case (Some(t), Some(a)) if t > 0 =>
         val percent = Math.round((1 - (a.toFloat / t.toFloat)) * 100)
         Json.obj(
           "total" -> JsNumber(t),

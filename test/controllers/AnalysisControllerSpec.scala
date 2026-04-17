@@ -69,13 +69,9 @@ object AnalysisControllerSpec extends MockedServices {
         |{
         |  "foo": {
         |    "mappings": {
-        |      "bar": {
-        |        "dynamic": "false",
-        |        "properties": {
-        |          "name": {
-        |            "type": "string",
-        |            "index": "not_analyzed"
-        |          }
+        |      "properties": {
+        |        "name": {
+        |          "type": "text"
         |        }
         |      }
         |    }

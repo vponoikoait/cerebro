@@ -2,6 +2,7 @@ angular.module('cerebro').controller('ConnectController', [
   '$scope', '$location', 'ConnectDataService', 'AlertService',
   function($scope, $location, ConnectDataService, AlertService) {
     $scope.hosts = undefined;
+    $scope.recentHosts = [];
 
     $scope.connecting = false;
 
@@ -13,13 +14,35 @@ angular.module('cerebro').controller('ConnectController', [
       ConnectDataService.getHosts(
           function(hosts) {
             $scope.hosts = hosts;
+            $scope.buildRecentHosts(hosts);
           },
           function(error) {
             AlertService.error('Error while fetching list of known hosts', error);
+            // Still show recent hosts even if server hosts fail
+            $scope.buildRecentHosts([]);
           }
       );
       $scope.host = $location.search().host;
       $scope.unauthorized = $location.search().unauthorized;
+    };
+
+    // Build the recent hosts list, excluding any that already appear
+    // in the server-side known hosts so there are no duplicates
+    $scope.buildRecentHosts = function(knownHosts) {
+      var known = (knownHosts || []).map(function(h) {
+        return h.trim().toLowerCase();
+      });
+      $scope.recentHosts = ConnectDataService.getRecentHosts().filter(
+          function(h) {
+            return known.indexOf(h.trim().toLowerCase()) === -1;
+          }
+      );
+    };
+
+    $scope.removeRecentHost = function(host, $event) {
+      $event.stopPropagation();
+      ConnectDataService.removeRecentHost(host);
+      $scope.buildRecentHosts($scope.hosts || []);
     };
 
     $scope.connect = function(host) {

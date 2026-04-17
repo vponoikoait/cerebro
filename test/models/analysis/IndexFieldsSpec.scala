@@ -9,7 +9,6 @@ object IndexFieldsSpec extends Specification {
     s2"""
     IndexField should
         should return only string fields                   $regularFields
-        should return fields from all types                $multipleTypes FIXME < 7
         should return sub fields on multi fields fields    $multiFields
         should return properties of object fields          $objects
 
@@ -23,43 +22,14 @@ object IndexFieldsSpec extends Specification {
         |    "mappings": {
         |      "properties": {
         |        "regular_field": {
-        |          "type": "string"
+        |          "type": "text"
         |        },
         |        "regular_field_2": {
-        |          "type": "string",
+        |          "type": "text",
         |          "analyzer": "standard"
         |        },
         |        "ignored_field": {
         |          "type": "integer"
-        |        }
-        |      }
-        |    }
-        |  }
-        |}
-      """.stripMargin
-    )
-    IndexFields("index_name", data) mustEqual Json.arr("regular_field", "regular_field_2")
-  }
-
-  def multipleTypes = {
-    val data = Json.parse(
-      """
-        |{
-        |  "index_name": {
-        |    "mappings": {
-        |      "type_1": {
-        |        "properties": {
-        |          "regular_field": {
-        |            "type": "string"
-        |          }
-        |        }
-        |      },
-        |      "type_2": {
-        |        "properties": {
-        |          "regular_field_2": {
-        |            "type": "string",
-        |            "analyzer": "standard"
-        |          }
         |        }
         |      }
         |    }
@@ -78,10 +48,10 @@ object IndexFieldsSpec extends Specification {
         |    "mappings": {
         |      "properties": {
         |        "multi_field": {
-        |          "type": "string",
+        |          "type": "text",
         |          "fields": {
         |            "sub_field": {
-        |              "type": "string"
+        |              "type": "text"
         |            },
         |            "ignored_sub_field": {
         |              "type": "integer"
@@ -110,14 +80,14 @@ object IndexFieldsSpec extends Specification {
         |            "first_level_property": {
         |              "properties": {
         |                "second_level_property": {
-        |                  "type": "string"
+        |                  "type": "text"
         |                }
         |              }
         |            },
         |            "first_level_property_2": {
         |              "properties": {
         |                "second_level_property": {
-        |                  "type": "string"
+        |                  "type": "text"
         |                }
         |              }
         |            }

@@ -27,13 +27,13 @@ class AuthController @Inject()(system: ActorSystem,
           case Some(url) =>
             Redirect(url, play.api.http.Status.SEE_OTHER)
           case None =>
-            Redirect(routes.Application.index())
+            Redirect(routes.Application.index)
         }
       }.getOrElse {
         Ok(views.html.auth.login())
       }
     } else {
-      Redirect(routes.Application.index())
+      Redirect(routes.Application.index)
     }
   }
 
@@ -49,11 +49,11 @@ class AuthController @Inject()(system: ActorSystem,
             val resp =
               request.session.get(AuthAction.REDIRECT_URL) match {
                 case Some(url) => Redirect(url, play.api.http.Status.SEE_OTHER)
-                case None => Redirect(routes.Application.index())
+                case None => Redirect(routes.Application.index)
               }
             resp.withSession(AuthAction.SESSION_USER -> username)
           case None =>
-            Redirect(routes.AuthController.index()).flashing(LOGIN_MSG -> "Incorrect username or password")
+            Redirect(routes.AuthController.index).flashing(LOGIN_MSG -> "Incorrect username or password")
         }
       }
     )

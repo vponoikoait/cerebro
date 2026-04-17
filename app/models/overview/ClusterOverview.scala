@@ -59,7 +59,7 @@ object ClusterOverview {
       Index(index, indexStats, shards, indexAliases, indexBlock)
     }.toSeq
 
-    val closedIndices = blocks.value.collect { // ES < 7.X does not return routing_table for closed indices
+    val closedIndices = blocks.value.collect { // Closed indices may not appear in routing_table
       case (name, block) if !routingTable.contains(name) && (block \ "4").isDefined =>
         ClosedIndex(name)
     }

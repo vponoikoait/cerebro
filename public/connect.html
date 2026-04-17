@@ -37,6 +37,27 @@
         </tbody>
       </table>
     </div>
+    <div ng-show="recentHosts.length > 0">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>Recent clusters</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="rhost in recentHosts track by $index">
+          <td class="normal-action" ng-click="connect(rhost)">
+            <span>{{rhost}}</span>
+            <button type="button" class="btn btn-xs btn-link pull-right"
+                    title="Remove from recent"
+                    ng-click="removeRecentHost(rhost, $event)">
+              <i class="fa fa-times text-muted"></i>
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
     <form>
       <div class="form-group">
         <label for="host">Node address</label>

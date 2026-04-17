@@ -10,32 +10,17 @@ case class NodeRoles(master: Boolean, data: Boolean, ingest: Boolean) {
 
 object NodeRoles {
 
-  private def truthy(value: String): Boolean = {
-    value.equals("true") || value.equals("yes")
-  }
+  // All data-tier roles in ES 7.x (data_frozen added in 7.12)
+  private val DataRoles = Seq(
+    "data", "data_content", "data_hot", "data_warm", "data_cold", "data_frozen"
+  ).map(JsString)
 
   def apply(nodeInfo: JsValue): NodeRoles = {
-    // >= 7.10
-    val dataRoles = Seq("data", "data_content", "data_hot", "data_warm", "data_cold").map(JsString)
-
-    (nodeInfo \ "roles").asOpt[JsArray] match {
-      case Some(JsArray(roles)) => // >= 5.X
-        NodeRoles(
-          roles.contains(JsString("master")),
-          roles.exists(role => dataRoles.contains(role)),
-          roles.contains(JsString("ingest"))
-        )
-
-      case None => // 2.X
-        val master = truthy((nodeInfo \ "attributes" \ "master").asOpt[String].getOrElse("true"))
-        val data = truthy((nodeInfo \ "attributes" \ "data").asOpt[String].getOrElse("true"))
-        val client = truthy((nodeInfo \ "attributes" \ "client").asOpt[String].getOrElse("false"))
-
-        NodeRoles(
-          master = master && !client,
-          data = data && !client,
-          ingest = false // 2.x doesnt support ingest
-        )
-    }
+    val roles = (nodeInfo \ "roles").as[JsArray].value
+    NodeRoles(
+      master = roles.contains(JsString("master")),
+      data   = roles.exists(role => DataRoles.contains(role)),
+      ingest = roles.contains(JsString("ingest"))
+    )
   }
 }

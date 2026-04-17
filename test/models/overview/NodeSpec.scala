@@ -33,7 +33,7 @@ object NodeSpec extends Specification {
         |  "master": true,
         |  "data": true,
         |  "coordinating": false,
-        |  "ingest": false,
+        |  "ingest": true,
         |  "heap": {
         |    "used": 28420720,
         |    "committed": 259522560,
@@ -52,7 +52,7 @@ object NodeSpec extends Specification {
         |}
       """.stripMargin
     )
-    val node = Node("nodeId", NodeInfoData.nodeInfo5, NodeStats.nodeStats5, "otherId")
+    val node = Node("nodeId", NodeInfoData.nodeInfo7_10, NodeStats.nodeStats5, "otherId")
     node mustEqual expected
   }
 
@@ -73,7 +73,7 @@ object NodeSpec extends Specification {
         |  "master": true,
         |  "data": true,
         |  "coordinating": false,
-        |  "ingest": false,
+        |  "ingest": true,
         |  "heap": {
         |    "used": 28420720,
         |    "committed": 259522560,
@@ -113,7 +113,7 @@ object NodeSpec extends Specification {
         |  "master": true,
         |  "data": true,
         |  "coordinating": false,
-        |  "ingest": false,
+        |  "ingest": true,
         |  "heap": {
         |    "used": 28420720,
         |    "committed": 259522560,
@@ -153,7 +153,7 @@ object NodeSpec extends Specification {
         |  "master": true,
         |  "data": true,
         |  "coordinating": false,
-        |  "ingest": false,
+        |  "ingest": true,
         |  "heap": {
         |    "used": 28420720,
         |    "committed": 259522560,

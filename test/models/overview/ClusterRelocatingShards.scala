@@ -601,6 +601,7 @@ object ClusterRelocatingShards extends ClusterStub {
       |      "version" : "2.1.0",
       |      "build" : "72cd1f1",
       |      "http_address" : "127.0.0.1:9201",
+      |      "roles": ["master", "data", "ingest"],
       |      "attributes": {
       |        "aws_availability_zone": "eu-west-1c",
       |        "node_type": "warm",
@@ -637,6 +638,7 @@ object ClusterRelocatingShards extends ClusterStub {
       |      "version" : "2.1.0",
       |      "build" : "72cd1f1",
       |      "http_address" : "127.0.0.1:9202",
+      |      "roles": ["master", "data", "ingest"],
       |      "attributes": {
       |        "aws_availability_zone": "eu-west-1c",
       |        "node_type": "warm",
@@ -673,6 +675,7 @@ object ClusterRelocatingShards extends ClusterStub {
       |      "version" : "2.1.0",
       |      "build" : "72cd1f1",
       |      "http_address" : "127.0.0.1:9200",
+      |      "roles": ["master", "data", "ingest"],
       |      "attributes": {
       |        "aws_availability_zone": "eu-west-1c",
       |        "node_type": "warm",

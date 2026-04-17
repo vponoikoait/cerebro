@@ -10,6 +10,37 @@ angular.module('cerebro').factory('DataService', ['$rootScope', '$timeout',
 
     var onGoingRequests = {};
 
+    // --- Session persistence helpers ---
+    var saveSession = function() {
+      if (host) {
+        $window.sessionStorage.setItem('cerebro:host', host);
+        if (username) {
+          $window.sessionStorage.setItem('cerebro:username', username);
+        } else {
+          $window.sessionStorage.removeItem('cerebro:username');
+        }
+        if (password) {
+          $window.sessionStorage.setItem('cerebro:password', password);
+        } else {
+          $window.sessionStorage.removeItem('cerebro:password');
+        }
+      }
+    };
+
+    var clearSession = function() {
+      $window.sessionStorage.removeItem('cerebro:host');
+      $window.sessionStorage.removeItem('cerebro:username');
+      $window.sessionStorage.removeItem('cerebro:password');
+    };
+
+    var restoreSession = function() {
+      return {
+        host: $window.sessionStorage.getItem('cerebro:host'),
+        username: $window.sessionStorage.getItem('cerebro:username'),
+        password: $window.sessionStorage.getItem('cerebro:password'),
+      };
+    };
+
     this.getHost = function() {
       return host;
     };
@@ -18,6 +49,7 @@ angular.module('cerebro').factory('DataService', ['$rootScope', '$timeout',
       host = newHost;
       username = newUsername;
       password = newPassword;
+      saveSession();
       $location.search('host', newHost);
       RefreshService.refresh();
     };
@@ -27,11 +59,18 @@ angular.module('cerebro').factory('DataService', ['$rootScope', '$timeout',
       username = undefined;
       password = undefined;
       onGoingRequests = {};
+      clearSession();
       $location.path('/connect');
     };
 
+    // Restore connection state: URL query param takes priority, then sessionStorage
     if ($location.search().host) {
       this.setHost($location.search().host);
+    } else {
+      var saved = restoreSession();
+      if (saved.host) {
+        this.setHost(saved.host, saved.username, saved.password);
+      }
     }
 
     // ---------- Navbar ----------

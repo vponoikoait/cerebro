@@ -12,9 +12,13 @@ object NodeStats {
       |  "transport_address":"127.0.0.1:9301",
       |  "host":"127.0.0.1",
       |  "ip": "127.0.0.1",
+      |  "roles": ["master", "data", "ingest"],
       |  "os":{
       |    "timestamp":1458346589015,
-      |    "load_average":3.17138671875,
+      |    "cpu":{
+      |      "load_average":{"1m":3.17138671875},
+      |      "percent":0
+      |    },
       |    "mem":{
       |      "total_in_bytes":8589934592,
       |      "free_in_bytes":101085184,
@@ -127,9 +131,13 @@ object NodeStats {
       |{
       |  "timestamp":1458346589015,
       |  "name":"Solara",
+      |  "roles": ["master", "data", "ingest"],
       |  "os":{
       |    "timestamp":1458346589015,
-      |    "load_average":3.17138671875,
+      |    "cpu":{
+      |      "load_average":{"1m":3.17138671875},
+      |      "percent":0
+      |    },
       |    "mem":{
       |      "total_in_bytes":8589934592,
       |      "free_in_bytes":101085184,

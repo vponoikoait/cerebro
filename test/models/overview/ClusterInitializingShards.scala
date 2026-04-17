@@ -169,7 +169,10 @@ object ClusterInitializingShards {
       |      "ip" : [ "127.0.0.1:9301", "NONE" ],
       |      "os" : {
       |        "timestamp" : 1458396821721,
-      |        "load_average" : 3.48583984375,
+      |        "cpu" : {
+      |          "percent" : 0,
+      |          "load_average" : {"1m" : 3.48583984375}
+      |        },
       |        "mem" : {
       |          "total_in_bytes" : 8589934592,
       |          "free_in_bytes" : 57360384,
@@ -280,7 +283,10 @@ object ClusterInitializingShards {
       |      "ip" : [ "127.0.0.1:9300", "NONE" ],
       |      "os" : {
       |        "timestamp" : 1458396821720,
-      |        "load_average" : 3.48583984375,
+      |        "cpu" : {
+      |          "percent" : 0,
+      |          "load_average" : {"1m" : 3.48583984375}
+      |        },
       |        "mem" : {
       |          "total_in_bytes" : 8589934592,
       |          "free_in_bytes" : 57360384,
@@ -505,6 +511,7 @@ object ClusterInitializingShards {
       |      "version" : "2.1.0",
       |      "build" : "72cd1f1",
       |      "http_address" : "127.0.0.1:9201",
+      |      "roles": ["master", "data", "ingest"],
       |      "attributes": {
       |        "aws_availability_zone": "eu-west-1c",
       |        "node_type": "warm",
@@ -541,6 +548,7 @@ object ClusterInitializingShards {
       |      "version" : "2.1.0",
       |      "build" : "72cd1f1",
       |      "http_address" : "127.0.0.1:9200",
+      |      "roles": ["master", "data", "ingest"],
       |      "attributes": {
       |        "aws_availability_zone": "eu-west-1c",
       |        "node_type": "warm",

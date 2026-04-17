@@ -1,0 +1,51 @@
+services:
+  # ---------------------------------------------------------------
+  # Elasticsearch 7.17.x for integration tests
+  # ---------------------------------------------------------------
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.27
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsSL http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - test-net
+
+  # ---------------------------------------------------------------
+  # Backend unit tests (sbt test)
+  # ---------------------------------------------------------------
+  backend-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+      target: backend-test
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - ES_HOST=http://elasticsearch:9200
+    networks:
+      - test-net
+
+  # ---------------------------------------------------------------
+  # Frontend unit tests (karma + headless Chrome)
+  # ---------------------------------------------------------------
+  frontend-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+      target: frontend-test
+    networks:
+      - test-net
+
+networks:
+  test-net:
+    driver: bridge

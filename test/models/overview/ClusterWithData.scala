@@ -148,7 +148,10 @@ trait ClusterWithData extends ClusterStub {
       |      ],
       |      "os": {
       |        "timestamp": 1458349670762,
-      |        "load_average": 3.34326171875,
+      |        "cpu": {
+      |          "percent": 0,
+      |          "load_average": {"1m": 3.34326171875}
+      |        },
       |        "mem": {
       |          "total_in_bytes": 8589934592,
       |          "free_in_bytes": 33009664,
@@ -264,7 +267,10 @@ trait ClusterWithData extends ClusterStub {
       |      ],
       |      "os": {
       |        "timestamp": 1458349670762,
-      |        "load_average": 3.34326171875,
+      |        "cpu": {
+      |          "percent": 0,
+      |          "load_average": {"1m": 3.34326171875}
+      |        },
       |        "mem": {
       |          "total_in_bytes": 8589934592,
       |          "free_in_bytes": 33009664,
@@ -518,6 +524,7 @@ trait ClusterWithData extends ClusterStub {
       |      "version": "2.1.0",
       |      "build": "72cd1f1",
       |      "http_address": "127.0.0.1:9201",
+      |      "roles": ["master", "data", "ingest"],
       |      "attributes": {
       |        "aws_availability_zone": "eu-west-1c",
       |        "node_type": "warm",
@@ -564,6 +571,7 @@ trait ClusterWithData extends ClusterStub {
       |      "version": "2.1.0",
       |      "build": "72cd1f1",
       |      "http_address": "127.0.0.1:9200",
+      |      "roles": ["master", "data", "ingest"],
       |      "attributes": {
       |        "aws_availability_zone": "eu-west-1c",
       |        "node_type": "warm",

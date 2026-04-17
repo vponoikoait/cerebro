@@ -16,6 +16,7 @@ describe('ConnectController', function() {
 
   it('should have initial state correctly set', function() {
     expect(this.scope.hosts).toEqual(undefined);
+    expect(this.scope.recentHosts).toEqual([]);
     expect(this.scope.connecting).toEqual(false);
   });
 
@@ -24,21 +25,23 @@ describe('ConnectController', function() {
       this.$location.search = function() {
         return {host: 'paramHost', unauthorized: true};
       };
-      var hosts = {host: 'http://somehost'};
+      var hosts = ['http://somehost'];
       this.ConnectDataService.getHosts = function(success, error) {
         success(hosts);
       };
       spyOn(this.ConnectDataService, "getHosts").and.callThrough();
+      spyOn(this.ConnectDataService, "getRecentHosts").and.returnValue([]);
       this.scope.setup();
       expect(this.scope.host).toEqual('paramHost');
       expect(this.scope.unauthorized).toEqual(true);
     });
     it('initializes list of known hosts', function() {
-      var hosts = {host: 'http://somehost'};
+      var hosts = ['http://somehost'];
       this.ConnectDataService.getHosts = function(success, error) {
         success(hosts);
       };
       spyOn(this.ConnectDataService, "getHosts").and.callThrough();
+      spyOn(this.ConnectDataService, "getRecentHosts").and.returnValue([]);
       this.scope.setup();
       expect(this.ConnectDataService.getHosts).toHaveBeenCalled();
       expect(this.scope.hosts).toEqual(hosts);
@@ -49,11 +52,51 @@ describe('ConnectController', function() {
         error(msg);
       };
       spyOn(this.ConnectDataService, 'getHosts').and.callThrough();
+      spyOn(this.ConnectDataService, "getRecentHosts").and.returnValue([]);
       spyOn(this.AlertService, 'error').and.returnValue(true);
       this.scope.setup();
       expect(this.ConnectDataService.getHosts).toHaveBeenCalled();
       expect(this.scope.hosts).toEqual(undefined);
       expect(this.AlertService.error).toHaveBeenCalledWith('Error while fetching list of known hosts', 'kaput');
+    });
+  });
+
+  describe('buildRecentHosts', function() {
+    it('excludes known hosts from recent list', function() {
+      this.ConnectDataService.getRecentHosts = function() {
+        return ['http://localhost:9200', 'http://other:9200'];
+      };
+      this.scope.buildRecentHosts(['http://localhost:9200']);
+      expect(this.scope.recentHosts).toEqual(['http://other:9200']);
+    });
+    it('returns all recent when no known hosts', function() {
+      this.ConnectDataService.getRecentHosts = function() {
+        return ['http://a:9200', 'http://b:9200'];
+      };
+      this.scope.buildRecentHosts([]);
+      expect(this.scope.recentHosts).toEqual(['http://a:9200', 'http://b:9200']);
+    });
+    it('handles empty recent hosts', function() {
+      this.ConnectDataService.getRecentHosts = function() {
+        return [];
+      };
+      this.scope.buildRecentHosts(['http://localhost:9200']);
+      expect(this.scope.recentHosts).toEqual([]);
+    });
+  });
+
+  describe('removeRecentHost', function() {
+    it('removes host and rebuilds list', function() {
+      spyOn(this.ConnectDataService, 'removeRecentHost');
+      this.ConnectDataService.getRecentHosts = function() {
+        return ['http://b:9200'];
+      };
+      this.scope.hosts = ['http://known:9200'];
+      var event = {stopPropagation: jasmine.createSpy('stopPropagation')};
+      this.scope.removeRecentHost('http://a:9200', event);
+      expect(event.stopPropagation).toHaveBeenCalled();
+      expect(this.ConnectDataService.removeRecentHost).toHaveBeenCalledWith('http://a:9200');
+      expect(this.scope.recentHosts).toEqual(['http://b:9200']);
     });
   });
 

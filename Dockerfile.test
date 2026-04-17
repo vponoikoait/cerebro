@@ -1,0 +1,56 @@
+# =============================================================================
+# Test Dockerfile — multi-target for backend and frontend tests
+# =============================================================================
+
+# =============================================================================
+# Stage: Frontend tests
+# =============================================================================
+FROM node:18-alpine AS frontend-test
+
+# Install Chromium for headless Karma tests
+RUN apk add --no-cache chromium
+ENV CHROME_BIN=/usr/bin/chromium-browser
+ENV CHROMIUM_FLAGS="--no-sandbox --headless --disable-gpu"
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY Gruntfile.js ./
+COPY conf/eslint.json conf/eslint.json
+COPY src/ src/
+COPY tests/ tests/
+COPY tests/karma.config.js tests/karma.config.js
+
+CMD ["npx", "grunt", "test"]
+
+# =============================================================================
+# Stage: Backend tests
+# =============================================================================
+FROM eclipse-temurin:11-jdk AS backend-test
+
+WORKDIR /app
+
+# Install sbt
+ARG SBT_VERSION=1.10.11
+RUN apt-get update && apt-get install -y curl && \
+    curl -fsSL "https://github.com/sbt/sbt/releases/download/v${SBT_VERSION}/sbt-${SBT_VERSION}.tgz" | \
+    tar xz -C /usr/local && \
+    ln -s /usr/local/sbt/bin/sbt /usr/local/bin/sbt && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy build definition for dependency caching
+COPY build.sbt ./
+COPY project/build.properties project/plugins.sbt project/
+
+# Pre-fetch dependencies
+RUN sbt update
+
+# Copy source and test files
+COPY app/ app/
+COPY conf/ conf/
+COPY test/ test/
+COPY public/ public/
+
+CMD ["sbt", "test"]

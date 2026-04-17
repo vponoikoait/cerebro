@@ -1,8 +1,9 @@
-version: '3'
 services:
   cerebro:
-    image: lmenezes/cerebro
-    environment: 
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    environment:
       - AUTH_TYPE=ldap
       - LDAP_URL=ldap://ldap:389
       - LDAP_BASE_DN=ou=people,dc=example,dc=org
@@ -13,13 +14,23 @@ services:
       - LDAP_USER_ATTR=uid
       - LDAP_USER_ATTR_TEMPLATE=%s
       - "LDAP_GROUP=memberof=cn=cerebro,ou=groups,dc=example,dc=org"
-    ports: 
-      - 9000:9000
+    ports:
+      - "9000:9000"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.27
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+
   open_ldap:
-    image: osixia/openldap:1.4.0
+    image: osixia/openldap:1.5.0
     container_name: ldap
-    ports: 
-      - 389:389
-      - 636:636
-    volumes: 
+    ports:
+      - "389:389"
+      - "636:636"
+    volumes:
       - ./ldif:/opt

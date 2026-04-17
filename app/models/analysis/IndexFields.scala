@@ -4,24 +4,14 @@ import play.api.libs.json._
 
 object IndexFields {
 
-  private final val AnalyzableFields = Seq(
-    "string", // FIXME: ES 2.X
-    "text"
-  )
+  private final val AnalyzableFields = Seq("text")
 
   private final def analyzable(fieldType: String) =
     AnalyzableFields.contains(fieldType)
 
   def apply(index: String, data: JsValue) = {
-    val docTypes = (data \ index \ "mappings").as[JsObject].keys
-    val fields = if (docTypes.size == 1 && docTypes.head == "properties") {
-      extractProperties((data \ index \ "mappings" \ "properties").as[JsValue])
-    } else { // FIXME: ES < 7
-      docTypes.flatMap { docType =>
-        extractProperties((data \ index \ "mappings" \ docType \ "properties").as[JsValue])
-      }.toSeq
-    }
-
+    // ES 7.x: typeless mappings — properties are directly under "mappings"
+    val fields = extractProperties((data \ index \ "mappings" \ "properties").as[JsValue])
     JsArray(fields.map(JsString))
   }
 

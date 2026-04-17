@@ -3,59 +3,68 @@ Cerebro
 [![Docker Pulls](https://img.shields.io/docker/pulls/lmenezes/cerebro.svg)](https://hub.docker.com/r/lmenezes/cerebro)
 ![build](https://github.com/lmenezes/cerebro/workflows/build/badge.svg?branch=master)
 
-cerebro is an open source(MIT License) elasticsearch web admin tool built using Scala, Play Framework, AngularJS and Bootstrap.
+cerebro is an open source (MIT License) elasticsearch web admin tool built using Scala, Play Framework, AngularJS and Bootstrap.
 
-### Requirements
+Compatible with Elasticsearch 7.x.
 
-cerebro needs Java 11 or newer to run.
+### Docker (recommended)
 
-### Installation
-- Download from [https://github.com/lmenezes/cerebro/releases](https://github.com/lmenezes/cerebro/releases)
-- Extract files
-- Run bin/cerebro(or bin/cerebro.bat if on Windows)
-- Access on http://localhost:9000
-
-### Chocolatey (Windows)
-
-You can install `cerebro` using [Chocolatey](https://chocolatey.org/):
+Build and run with Docker:
 
 ```sh
-choco install cerebro-es
+docker compose up -d
 ```
 
-Package creates windows service ```cerebro```.
-Access on http://localhost:9000
+This starts Cerebro on [http://localhost:9000](http://localhost:9000) alongside an Elasticsearch 7.17.x instance on port 9200.
 
-### Docker
+To build the image standalone:
 
-You can find the official docker images in the official [docker hub repo](https://hub.docker.com/r/lmenezes/cerebro/).
+```sh
+docker build -t cerebro .
+docker run -p 9000:9000 cerebro
+```
 
-Visit [cerebro-docker](https://github.com/lmenezes/cerebro-docker) for further information. 
+Pre-built images are also available on [Docker Hub](https://hub.docker.com/r/lmenezes/cerebro/) and [GitHub Container Registry](https://github.com/lmenezes/cerebro/pkgs/container/cerebro).
+
+### Running tests
+
+All tests run inside Docker:
+
+```sh
+# Run backend (sbt) and frontend (karma) tests
+docker compose -f docker-compose.test.yml run --rm backend-test
+docker compose -f docker-compose.test.yml run --rm frontend-test
+
+# Tear down
+docker compose -f docker-compose.test.yml down -v
+```
+
+Backend tests use an Elasticsearch 7.17.x service container that starts automatically.
 
 ### Configuration
 
 #### HTTP server address and port
-You can run cerebro listening on a different host and port(defaults to 0.0.0.0:9000):
 
-```
-bin/cerebro -Dhttp.port=1234 -Dhttp.address=127.0.0.1
+You can run cerebro listening on a different port (defaults to 9000):
+
+```sh
+docker run -p 1234:1234 -e CEREBRO_PORT=1234 cerebro
 ```
 
 #### LDAP config
 
-LDAP can be configured using environment variables. If you typically run cerebro using docker,
-you can pass a file with all the env vars. The file would look like:
+LDAP can be configured using environment variables. Pass a file with all the env vars:
 
 ```bash
 # Set it to ldap to activate ldap authorization
 AUTH_TYPE=ldap
 
 # Your ldap url
-LDAP_URL=ldap://exammple.com:389
+LDAP_URL=ldap://example.com:389
 
 LDAP_BASE_DN=OU=users,DC=example,DC=com
 
-# Usually method should  be "simple" otherwise, set it to the SASL mechanisms
+# Usually method should be "simple" otherwise, set it to the SASL mechanisms
 LDAP_METHOD=simple
 
 # user-template executes a string.format() operation where
@@ -80,27 +89,28 @@ LDAP_BIND_PWD=adminpass
 # If left unset LDAP_USER_TEMPLATE will be used
 # LDAP_USER_ATTR_TEMPLATE=%s
 
-# Filter that tests membership of the group. If this property is empty then there is no group membership check
+# Filter that tests membership of the group
 # AD example => memberOf=CN=mygroup,ou=ouofthegroup,DC=domain,DC=com
 # OpenLDAP example => CN=mygroup
-# LDAP_GROUP=memberOf=memberOf=CN=mygroup,ou=ouofthegroup,DC=domain,DC=com
-
+# LDAP_GROUP=memberOf=CN=mygroup,ou=ouofthegroup,DC=domain,DC=com
 ```
-
-You can the pass this file as argument using:
 
 ```bash
- docker run -p 9000:9000 --env-file env-ldap  lmenezes/cerebro
+docker run -p 9000:9000 --env-file env-ldap cerebro
 ```
 
-There are some examples of configuration in the [examples folder](./examples).
+There are configuration examples in the [examples folder](./examples).
 
 #### Other settings
 
-Other settings are exposed through the **conf/application.conf** file found on the application directory.
+Other settings are exposed through the **conf/application.conf** file. Mount a custom config:
 
-It is also possible to use an alternate configuration file defined on a different location:
-
+```sh
+docker run -p 9000:9000 -v /path/to/application.conf:/opt/cerebro/conf/application.conf cerebro
 ```
-bin/cerebro -Dconfig.file=/some/other/dir/alternate.conf
+
+Or pass JVM system properties:
+
+```sh
+docker run -p 9000:9000 cerebro -Dconfig.file=/opt/cerebro/conf/alternate.conf
 ```

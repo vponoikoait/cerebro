@@ -19,7 +19,7 @@ class HTTPElasticClient @Inject()(client: WSClient) extends ElasticClient {
     execute(s"", "GET", None, target)
 
   def clusterState(target: ElasticServer) = {
-    val path = "/_cluster/state/master_node,routing_table,routing_nodes,blocks"
+    val path = "/_cluster/state/master_node,routing_table,blocks"
     execute(path, "GET", None, target)
   }
 
@@ -330,12 +330,12 @@ class HTTPElasticClient @Inject()(client: WSClient) extends ElasticClient {
         request.withAuth(auth.username, auth.password, WSAuthScheme.BASIC)
     }
 
-    body.fold(request)(request.withBody((_))).execute().map { response =>
+    body.fold(request)(b => request.withBody(b)).execute().map { response =>
       ElasticResponse(response)
     }
   }
 
-  // FIXME: ES > 5.X does not support indices with special characters, so this could be removed
+  // ES 7.x does not support indices with special characters, so this could be removed
   private def encoded(text: String): String = URLEncoder.encode(text, "UTF-8")
 
   override def catMaster(target: ElasticServer): Future[ElasticResponse] = {
